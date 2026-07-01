@@ -4,229 +4,487 @@ import joblib
 import os
 from datetime import datetime
 
-# -------------------------------------------------
-# Page Configuration
-# -------------------------------------------------
+# ---------------------------------------
+# PAGE CONFIGURATION
+# ---------------------------------------
+
 st.set_page_config(
-    page_title="Crop Recommendation Agent",
+    page_title="AI Smart Farming Assistant",
     page_icon="🌾",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# -------------------------------------------------
-# Load Model
-# -------------------------------------------------
+# ---------------------------------------
+# LOAD MACHINE LEARNING MODEL
+# ---------------------------------------
+
 model = joblib.load("crop_recommendation_model.pkl")
 encoder = joblib.load("label_encoder.pkl")
 
 # -------------------------------------------------
-# Sidebar
+# SIDEBAR
 # -------------------------------------------------
-st.sidebar.title("🌱 AI Farming Assistant")
 
-st.sidebar.markdown("## Project Features")
+st.sidebar.title("🌾 AI Farming Assistant")
 
-st.sidebar.success("✅ Crop Recommendation")
-st.sidebar.success("✅ Cultivation Records")
-st.sidebar.success("✅ Prediction History")
+st.sidebar.markdown("### Smart Farming using Machine Learning")
 
-st.sidebar.markdown("---")
+st.sidebar.divider()
 
-st.sidebar.info("""
-### Developed Using
 
-• Python
 
-• Streamlit
 
-• Machine Learning
 
-• Random Forest
-""")
+menu = st.sidebar.radio(
 
-# -------------------------------------------------
-# Title
-# -------------------------------------------------
-st.markdown(
-"""
-<h1 style='text-align:center;color:green;'>
-🌾 Crop Recommendation Agent
-</h1>
-""",
-unsafe_allow_html=True
+    "📂 Navigation",
+
+    [
+
+        "🏠 Dashboard",
+
+        "🌱 Crop Recommendation",
+
+        "📊 Analytics",
+
+        "🌿 Fertilizer Guide",
+
+        "💰 Profit Estimator",
+
+        "📄 PDF Report",
+
+        "ℹ About"
+
+    ]
+
 )
 
-st.markdown(
-"<h4 style='text-align:center;'>AI Powered Smart Farming Assistant</h4>",
-unsafe_allow_html=True
+st.sidebar.divider()
+
+# ---------------------------------------
+# LANGUAGE SELECTOR
+# ---------------------------------------
+
+language = st.sidebar.selectbox(
+    "🌐 Select Language",
+    ["English", "తెలుగు", "हिन्दी"],
+    key="language_selector"
 )
 
-st.markdown("---")
+# ---------------------------------------
+# TRANSLATION DICTIONARY
+# ---------------------------------------
 
-# -------------------------------------------------
-# Input Section
-# -------------------------------------------------
+if language == "English":
 
-col1, col2 = st.columns(2)
+    text = {
+        "dashboard":"🏠 Dashboard",
+        "crop":"🌱 Crop Recommendation",
+        "analytics":"📊 Analytics",
+        "fertilizer":"🌿 Fertilizer Guide",
+        "profit":"💰 Profit Estimator",
+        "report":"📄 PDF Report",
+        "about":"ℹ About",
+        "predict":"🌾 Predict Crop",
+        "soil":"🌱 Soil & Weather Information",
+        "recommended":"Recommended Crop",
+        "welcome":"Welcome to the AI Smart Farming Assistant"
+    }
 
-with col1:
+elif language == "తెలుగు":
 
-    n = st.number_input("Nitrogen (N)", min_value=0)
-
-    p = st.number_input("Phosphorus (P)", min_value=0)
-
-    k = st.number_input("Potassium (K)", min_value=0)
-
-    temperature = st.number_input("Temperature (°C)", format="%.2f")
-
-with col2:
-
-    humidity = st.number_input("Humidity (%)", format="%.2f")
-
-    ph = st.number_input("pH Value", format="%.2f")
-
-    rainfall = st.number_input("Rainfall (mm)", format="%.2f")
-
-# -------------------------------------------------
-# Predict Button
-# -------------------------------------------------
-
-if st.button("🌱 Predict Crop"):
-
-    sample = [[
-        n,
-        p,
-        k,
-        temperature,
-        humidity,
-        ph,
-        rainfall
-    ]]
-
-    prediction = model.predict(sample)
-
-    crop = encoder.inverse_transform(prediction)
-
-    st.success(f"✅ Recommended Crop : {crop[0]}")
-
-    st.markdown("---")
-
-    colA, colB = st.columns(2)
-
-    with colA:
-        st.metric("🌾 Recommended Crop", crop[0])
-
-    with colB:
-        st.metric(
-            "📅 Prediction Date",
-            datetime.now().strftime("%d-%m-%Y")
-        )
-
-    # Save Record
-
-    record = pd.DataFrame({
-
-        "Date & Time":[datetime.now().strftime("%d-%m-%Y %H:%M:%S")],
-
-        "Nitrogen":[n],
-
-        "Phosphorus":[p],
-
-        "Potassium":[k],
-
-        "Temperature":[temperature],
-
-        "Humidity":[humidity],
-
-        "pH":[ph],
-
-        "Rainfall":[rainfall],
-
-        "Recommended Crop":[crop[0]]
-
-    })
-
-    file_name="cultivation_records.csv"
-
-    if os.path.exists(file_name):
-
-        record.to_csv(
-            file_name,
-            mode="a",
-            header=False,
-            index=False
-        )
-
-    else:
-
-        record.to_csv(
-            file_name,
-            index=False
-        )
-
-# -------------------------------------------------
-# Display Records
-# -------------------------------------------------
-
-st.markdown("---")
-
-st.subheader("📋 Cultivation Records")
-
-file_name="cultivation_records.csv"
-
-if os.path.exists(file_name):
-
-    history=pd.read_csv(file_name)
-
-    st.metric("📊 Total Predictions",len(history))
-
-    st.dataframe(history,use_container_width=True)
-
-    st.subheader("📊 Crop Prediction Summary")
-
-    crop_counts=history["Recommended Crop"].value_counts()
-
-    st.bar_chart(crop_counts)
-
-    with open(file_name,"rb") as file:
-
-        st.download_button(
-
-            label="⬇️ Download Cultivation Records",
-
-            data=file,
-
-            file_name="cultivation_records.csv",
-
-            mime="text/csv"
-
-        )
-
-    if st.button("🗑️ Clear All Records"):
-
-        os.remove(file_name)
-
-        st.success("Records Deleted Successfully!")
-
-        st.rerun()
+    text = {
+        "dashboard":"🏠 డాష్‌బోర్డ్",
+        "crop":"🌱 పంట సూచన",
+        "analytics":"📊 విశ్లేషణ",
+        "fertilizer":"🌿 ఎరువుల సూచన",
+        "profit":"💰 లాభాల అంచనా",
+        "report":"📄 నివేదిక",
+        "about":"ℹ గురించి",
+        "predict":"🌾 పంటను సూచించు",
+        "soil":"🌱 నేల మరియు వాతావరణ సమాచారం",
+        "recommended":"సూచించిన పంట",
+        "welcome":"AI స్మార్ట్ వ్యవసాయ సహాయకానికి స్వాగతం"
+    }
 
 else:
 
-    st.info("No cultivation records found.")
+    text = {
+        "dashboard":"🏠 डैशबोर्ड",
+        "crop":"🌱 फसल अनुशंसा",
+        "analytics":"📊 विश्लेषण",
+        "fertilizer":"🌿 उर्वरक मार्गदर्शिका",
+        "profit":"💰 लाभ अनुमान",
+        "report":"📄 रिपोर्ट",
+        "about":"ℹ परिचय",
+        "predict":"🌾 फसल बताएं",
+        "soil":"🌱 मिट्टी और मौसम की जानकारी",
+        "recommended":"अनुशंसित फसल",
+        "welcome":"AI स्मार्ट खेती सहायक में आपका स्वागत है"
+    }
 
-# -------------------------------------------------
-# Footer
-# -------------------------------------------------
+st.sidebar.success("🤖 Model\n\nRandom Forest")
+
+st.sidebar.info("🎯 Accuracy\n\n99.32%")
+
+st.sidebar.warning("📁 Dataset\n\n2200 Samples")
+
+st.sidebar.divider()
+
+st.sidebar.caption("Developed Using")
+
+st.sidebar.caption("✔ Python")
+
+st.sidebar.caption("✔ Streamlit")
+
+st.sidebar.caption("✔ Machine Learning")
+
+st.sidebar.caption("✔ Random Forest")
+
+st.markdown("""
+<h1 style='text-align:center;
+color:#22c55e;
+font-size:52px;
+font-weight:bold;'>
+
+🌾 AI Smart Farming Assistant
+
+</h1>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<h4 style='text-align:center;
+color:#d1d5db;'>
+
+AI Powered Crop Recommendation using Machine Learning
+
+</h4>
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 
-st.markdown(
-"""
-<center>
+# ---------------------------------------------
+# DASHBOARD PAGE
+# ---------------------------------------------
 
-Developed using ❤️ with Python, Streamlit & Machine Learning
+if menu == "🏠 Dashboard":
 
-</center>
-""",
-unsafe_allow_html=True
-)
+    st.markdown(f"## {text['dashboard']}")
+
+    st.success(text["welcome"])
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.metric("🎯 Accuracy", "99.32%")
+
+    with c2:
+        st.metric("🤖 Model", "Random Forest")
+
+    with c3:
+        st.metric("📁 Dataset", "2200")
+
+    with c4:
+        st.metric("🌾 Predictions", "0")
+
+    st.markdown("---")
+
+    st.subheader("📖 About This Project")
+
+    st.write("""
+This AI Smart Farming Assistant recommends the best crop
+based on soil nutrients and weather conditions using a
+Machine Learning Random Forest model.
+
+The application helps farmers make better decisions,
+increase productivity and improve crop planning.
+""")
+    # ---------------------------------------------------
+# CROP RECOMMENDATION
+# ---------------------------------------------------
+
+if menu == "🌱 Crop Recommendation":
+
+    st.header(text["crop"])
+
+    st.write(text["soil"])
+    left, right = st.columns(2)
+
+    with left:
+
+        nitrogen = st.number_input("Nitrogen (N)", value=90)
+
+        phosphorus = st.number_input("Phosphorus (P)", value=42)
+
+        potassium = st.number_input("Potassium (K)", value=43)
+
+        temperature = st.number_input("Temperature (°C)", value=20.8)
+
+    with right:
+
+        humidity = st.number_input("Humidity (%)", value=82.0)
+
+        ph = st.number_input("Soil pH", value=6.5)
+
+        rainfall = st.number_input("Rainfall (mm)", value=202.9)
+
+    predict = st.button(text["predict"])
+
+    if predict:
+
+        sample = [[
+            nitrogen,
+            phosphorus,
+            potassium,
+            temperature,
+            humidity,
+            ph,
+            rainfall
+        ]]
+
+        prediction = model.predict(sample)
+
+        crop = encoder.inverse_transform(prediction)[0]
+
+        st.success(f"✅ {text['recommended']}: **{crop.upper()}**")
+
+        record = pd.DataFrame({
+
+            "Date":[datetime.now().strftime("%d-%m-%Y %H:%M")],
+
+            "Nitrogen":[nitrogen],
+
+            "Phosphorus":[phosphorus],
+
+            "Potassium":[potassium],
+
+            "Temperature":[temperature],
+
+            "Humidity":[humidity],
+
+            "pH":[ph],
+
+            "Rainfall":[rainfall],
+
+            "Recommended Crop":[crop]
+
+        })
+
+        file_name = "cultivation_records.csv"
+
+        if os.path.exists(file_name):
+
+            record.to_csv(
+                file_name,
+                mode="a",
+                header=False,
+                index=False
+            )
+
+        else:
+
+            record.to_csv(
+                file_name,
+                index=False
+            )
+
+
+
+        
+
+        # ---------------------------------------------------
+# ANALYTICS
+# ---------------------------------------------------
+
+# ---------------------------------------------------
+# ANALYTICS
+# ---------------------------------------------------
+
+if menu == "📊 Analytics":
+
+    st.header("📊 Analytics")
+
+    if os.path.exists("cultivation_records.csv"):
+
+        history = pd.read_csv("cultivation_records.csv")
+
+        st.success(f"📊 Total Predictions : {len(history)}")
+
+        st.subheader("📋 Prediction History")
+
+        st.dataframe(history, use_container_width=True)
+
+        st.markdown("---")
+
+        crop_counts = history["Recommended Crop"].value_counts()
+
+        st.subheader("📊 Crop Frequency")
+
+        st.bar_chart(crop_counts)
+
+        st.markdown("---")
+
+        st.subheader("📈 Crop Distribution")
+
+        st.line_chart(crop_counts)
+
+    else:
+
+        st.warning("No prediction history available.")
+
+        # ---------------------------------------------------
+# FERTILIZER GUIDE
+# ---------------------------------------------------
+
+if menu == "🌿 Fertilizer Guide":
+
+    st.header("🌿 Fertilizer Guide")
+
+    crop = st.selectbox(
+
+        "Select Crop",
+
+        [
+
+            "Rice",
+            "Maize",
+            "Cotton",
+            "Mango",
+            "Apple",
+            "Banana"
+
+        ]
+
+    )
+
+    fertilizer = {
+
+        "Rice":"Urea + DAP",
+
+        "Maize":"NPK 20:20:20",
+
+        "Cotton":"Potash + Urea",
+
+        "Mango":"Organic Compost",
+
+        "Apple":"Vermicompost",
+
+        "Banana":"NPK 10:26:26"
+
+    }
+
+    st.success(f"Recommended Fertilizer: {fertilizer[crop]}")
+
+    # ---------------------------------------------------
+# PROFIT ESTIMATOR
+# ---------------------------------------------------
+
+if menu == "💰 Profit Estimator":
+
+    st.header("💰 Profit Estimator")
+
+    st.write("Estimate your expected crop income.")
+
+    crop = st.selectbox(
+        "Select Crop",
+        [
+            "Rice",
+            "Maize",
+            "Cotton",
+            "Banana",
+            "Apple",
+            "Mango"
+        ]
+    )
+
+    area = st.number_input(
+        "Land Area (Acres)",
+        min_value=1.0,
+        value=1.0
+    )
+
+    yield_per_acre = st.number_input(
+        "Expected Yield per Acre (kg)",
+        min_value=100,
+        value=3000
+    )
+
+    market_price = st.number_input(
+        "Market Price (₹ per kg)",
+        min_value=1,
+        value=20
+    )
+
+    if st.button("💵 Calculate Income"):
+
+        total_yield = area * yield_per_acre
+
+        income = total_yield * market_price
+
+        st.success(f"🌾 Total Yield : {total_yield:,.0f} kg")
+
+        st.success(f"💰 Estimated Income : ₹ {income:,.0f}")
+
+        # ---------------------------------------------------
+# PDF REPORT
+# ---------------------------------------------------
+
+if menu == "📄 PDF Report":
+
+    st.header("📄 Reports")
+
+    st.write("Download your cultivation records.")
+
+    file_name = "cultivation_records.csv"
+
+    if os.path.exists(file_name):
+
+        with open(file_name, "rb") as file:
+
+            st.download_button(
+                label="⬇ Download Cultivation Records",
+                data=file,
+                file_name="cultivation_records.csv",
+                mime="text/csv"
+            )
+
+    else:
+
+        st.warning("No cultivation records found.")
+
+        # ---------------------------------------------------
+# ABOUT
+# ---------------------------------------------------
+
+if menu == "ℹ About":
+
+    st.header("ℹ About This Project")
+
+    st.markdown("""
+### 🌾 AI Smart Farming Assistant
+
+This application recommends the most suitable crop using
+Machine Learning based on soil nutrients and weather conditions.
+
+### Technologies Used
+
+- Python
+- Streamlit
+- Scikit-learn
+- Pandas
+- Machine Learning
+- Random Forest Classifier
+
+### Dataset
+
+Crop Recommendation Dataset
+
+### Developer
+
+**Ramya Sri Jaggarapu**
+
+B.Tech Student
+
+AI & Machine Learning Enthusiast
+""")
